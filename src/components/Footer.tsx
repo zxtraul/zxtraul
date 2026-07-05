@@ -2,6 +2,7 @@ import Link from "next/link";
 import { portfolioData } from "@/data/portfolioData";
 import { Mail, MapPin, Activity } from "lucide-react";
 import ContactForm from "./ContactForm";
+import { SignatureMark } from "./SignatureMark";
 
 export default function Footer() {
   return (
@@ -92,7 +93,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-slate-300 dark:border-slate-800 text-center text-sm text-slate-500">
-          <p>© {new Date().getFullYear()} Dr. Rahul Parajuli. All rights reserved.</p>
+          <SignatureMark />
+          <p className="mt-3">© {new Date().getFullYear()} Dr. Rahul Parajuli. All rights reserved.</p>
           <p className="mt-1">Designed with a Clinical-Tech aesthetic.</p>
         </div>
       </div>
