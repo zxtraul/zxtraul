@@ -33,10 +33,13 @@ function computeTier(): WebGLTier {
   const memory = (navigator as Navigator & { deviceMemory?: number })
     .deviceMemory;
 
+  // Coarse pointer (touch) is the primary low-tier signal. Core/memory
+  // checks only catch genuinely weak hardware — a 4-core laptop is common
+  // and should still get the full experience, so the bar here is low.
   const isLowPower =
     isCoarsePointer ||
-    (typeof cores === "number" && cores <= 4) ||
-    (typeof memory === "number" && memory <= 4);
+    (typeof cores === "number" && cores <= 2) ||
+    (typeof memory === "number" && memory <= 2);
 
   return isLowPower ? "low" : "high";
 }

@@ -2,11 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
 import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate, useVelocity } from "framer-motion";
+import { useWebGLCapability } from "./three/useWebGLCapability";
+
+const BackgroundScene = dynamic(() => import("./three/BackgroundScene"), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function InteractiveBackground() {
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
+  const webglTier = useWebGLCapability();
   const isHome = pathname === "/";
   const { scrollYProgress } = useScroll();
   
@@ -86,8 +94,12 @@ export default function InteractiveBackground() {
 
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-[-2] bg-slate-950 transition-colors duration-500">
-      
-
+      {/* WebGL ambient particle depth layer — 'high' tier only, additive under the CSS overlays below */}
+      {webglTier === "high" && (
+        <div className="absolute inset-0">
+          <BackgroundScene />
+        </div>
+      )}
 
       {/* Scanlines Overlay for Hologram Texture */}
       <div 
