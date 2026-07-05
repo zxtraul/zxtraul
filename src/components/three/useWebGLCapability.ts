@@ -52,6 +52,10 @@ export function useWebGLCapability(): WebGLTier {
   const [tier, setTier] = useState<WebGLTier>("none");
 
   useEffect(() => {
+    // Reading window.matchMedia/navigator must happen post-mount for SSR
+    // safety (initial render always starts from 'none'); this is the
+    // documented exception for syncing from a browser-only API on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTier(computeTier());
 
     const reducedMotionQuery = window.matchMedia(

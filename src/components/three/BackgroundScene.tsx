@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { CanvasRoot } from "./CanvasRoot";
@@ -11,30 +11,35 @@ const FIELD_WIDTH = 16;
 const FIELD_HEIGHT = 10;
 const FIELD_DEPTH = 6;
 
-function useParticleField(count: number) {
-  return useMemo(() => {
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-    const teal = new THREE.Color("#2dd4bf");
-    const blue = new THREE.Color("#3b82f6");
+/**
+ * Computed once at module load (not per-render/per-mount) — keeps the
+ * random field generation out of any component's render path entirely,
+ * since the field never needs to change between mounts.
+ */
+function createParticleField(count: number) {
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const teal = new THREE.Color("#2dd4bf");
+  const blue = new THREE.Color("#3b82f6");
 
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * FIELD_WIDTH;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * FIELD_HEIGHT;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * FIELD_DEPTH - 2;
+  for (let i = 0; i < count; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * FIELD_WIDTH;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * FIELD_HEIGHT;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * FIELD_DEPTH - 2;
 
-      const mixed = teal.clone().lerp(blue, Math.random());
-      colors[i * 3] = mixed.r;
-      colors[i * 3 + 1] = mixed.g;
-      colors[i * 3 + 2] = mixed.b;
-    }
-    return { positions, colors };
-  }, [count]);
+    const mixed = teal.clone().lerp(blue, Math.random());
+    colors[i * 3] = mixed.r;
+    colors[i * 3 + 1] = mixed.g;
+    colors[i * 3 + 2] = mixed.b;
+  }
+  return { positions, colors };
 }
+
+const PARTICLE_FIELD = createParticleField(PARTICLE_COUNT);
 
 function ParticleField() {
   const pointsRef = useRef<THREE.Points>(null);
-  const { positions, colors } = useParticleField(PARTICLE_COUNT);
+  const { positions, colors } = PARTICLE_FIELD;
   const pointerRef = useRef({ x: 0, y: 0 });
 
   usePointer((state: PointerState) => {

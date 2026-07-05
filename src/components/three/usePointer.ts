@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 export interface PointerState {
   /** Normalized [-1, 1] range, origin center, matches Three.js NDC convention (y up). */
@@ -43,24 +43,20 @@ function ensureAttached() {
  * Single shared pointer-position source so CSS effects (spotlight/grid)
  * and WebGL scenes stay perfectly in sync off one listener, instead of
  * each component running its own independent mousemove handler.
+ *
+ * Deliberately does not return a value: consumers pass a callback that
+ * writes into their own ref (read later inside useFrame/effects), since
+ * returning ref.current here would mean reading a ref during render.
  */
-export function usePointer(onMove?: Listener): PointerState {
-  const ref = useRef(current);
-
+export function usePointer(onMove: Listener): void {
   useEffect(() => {
     ensureAttached();
-    const listener: Listener = (state) => {
-      ref.current = state;
-      onMove?.(state);
-    };
-    listeners.add(listener);
+    listeners.add(onMove);
     return () => {
-      listeners.delete(listener);
+      listeners.delete(onMove);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  return ref.current;
 }
 
 /** Non-reactive accessor for use inside useFrame loops (avoids re-renders). */
