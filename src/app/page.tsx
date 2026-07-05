@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import { portfolioData } from "@/data/portfolioData";
@@ -8,6 +8,7 @@ import { MapPin, Award, Activity, Stethoscope, ChevronDown, ChevronUp, BookOpen,
 import { useSearchParams } from "next/navigation";
 import clsx from "clsx";
 import { HeroVisual } from "@/components/three/HeroVisual";
+import { TimelineSpine } from "@/components/three/TimelineSpine";
 
 
 
@@ -34,6 +35,7 @@ export default function Home() {
   // Typing text carousel state
   const domains = ["Critical Care", "Cardiovascular/Pulmonary", "AI in Health", "Clinical Research"];
   const [currentDomain, setCurrentDomain] = useState(0);
+  const timelineRef = useRef<HTMLDivElement>(null);
 
   const handleCloseCVModal = () => {
     setIsCVModalOpen(false);
@@ -238,7 +240,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="relative border-l-2 border-teal-500/25 dark:border-teal-500/15 ml-4 md:ml-8">
+        <div ref={timelineRef} className="relative border-l-2 border-teal-500/25 dark:border-teal-500/15 ml-4 md:ml-8">
+          <TimelineSpine containerRef={timelineRef} />
           <AnimatePresence>
             {filteredPositions.map((pos, index) => (
               <motion.div 
