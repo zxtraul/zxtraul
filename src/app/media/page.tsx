@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Image as ImageIcon } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
+import { GalleryTileTilt } from "@/components/three/GalleryTileTilt";
 
 // Mock media items with actual generated image paths
 const mediaItems = [
@@ -80,22 +81,22 @@ export default function MediaPage() {
               transition={{ delay: idx * 0.1 }}
               className="break-inside-avoid"
             >
-              <div 
+              <GalleryTileTilt
                 onClick={() => setSelectedImage(item)}
                 className={clsx(
                   "relative group cursor-pointer overflow-hidden rounded-2xl backdrop-blur-xl bg-white/20 dark:bg-slate-950/35 border border-white/20 dark:border-white/10 shadow-md hover:shadow-xl hover:shadow-teal-500/5 transition-all duration-300",
-                  item.type === "landscape" ? "aspect-video" : 
+                  item.type === "landscape" ? "aspect-video" :
                   item.type === "portrait" ? "aspect-[3/4]" : "aspect-square"
                 )}
               >
-                <Image 
+                <Image
                   src={item.image}
                   alt={item.title}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
                 />
-                
+
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/35 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                   <h3 className="text-white font-bold text-lg translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                     {item.title}
@@ -104,7 +105,7 @@ export default function MediaPage() {
                     {item.description}
                   </p>
                 </div>
-              </div>
+              </GalleryTileTilt>
             </motion.div>
           ))}
         </div>
