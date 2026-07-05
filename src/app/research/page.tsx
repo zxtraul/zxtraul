@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { portfolioData } from "@/data/portfolioData";
 import { Search, ExternalLink, Copy, Check, BookOpen, Activity, Library, Award } from "lucide-react";
 import clsx from "clsx";
+import { HelixAccent } from "@/components/three/HelixAccent";
 
 export default function ResearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,8 +26,9 @@ export default function ResearchPage() {
   return (
     <div className="pt-24 pb-20">
       {/* EXECUTIVE SUMMARY */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
-        <motion.div 
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+        <HelixAccent />
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto text-center"
