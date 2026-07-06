@@ -4,13 +4,16 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import { portfolioData } from "@/data/portfolioData";
-import { MapPin, Award, Activity, Stethoscope, ChevronDown, ChevronUp, BookOpen, Users, Heart, X } from "lucide-react";
+import { MapPin, Award, Activity, Stethoscope, ChevronDown, ChevronUp, BookOpen, Users, Heart } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import clsx from "clsx";
 import { HeroVisual } from "@/components/three/HeroVisual";
 import { TimelineSpine } from "@/components/three/TimelineSpine";
-
-
+import { TrustBar, OrcidIcon } from "@/components/TrustBar";
+import { FeaturedResearch } from "@/components/home/FeaturedResearch";
+import { ClosingCTA } from "@/components/home/ClosingCTA";
+import { useSectionParallax } from "@/hooks/useSectionParallax";
+import { fadeUp, staggerContainer, staggerItem, viewportOnce, duration, easing } from "@/lib/motion";
 
 // Search params listener to trigger CV modal from external links/bots
 function SearchParamsListener({ onOpenCV }: { onOpenCV: () => void }) {
@@ -31,12 +34,21 @@ export default function Home() {
   const [expandedNode, setExpandedNode] = useState<number | null>(null);
   const [isCVModalOpen, setIsCVModalOpen] = useState(false);
 
-  
   // Typing text carousel state
   const domains = ["Critical Care", "Cardiovascular/Pulmonary", "AI in Health", "Clinical Research"];
   const [currentDomain, setCurrentDomain] = useState(0);
   const timelineRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
+
+  const overviewHeaderRef = useRef<HTMLDivElement>(null);
+  const trajectoryHeaderRef = useRef<HTMLDivElement>(null);
+  const toolkitHeaderRef = useRef<HTMLDivElement>(null);
+  const humanitarianHeaderRef = useRef<HTMLDivElement>(null);
+
+  const overviewParallax = useSectionParallax(overviewHeaderRef);
+  const trajectoryParallax = useSectionParallax(trajectoryHeaderRef);
+  const toolkitParallax = useSectionParallax(toolkitHeaderRef);
+  const humanitarianParallax = useSectionParallax(humanitarianHeaderRef);
 
   const handleCloseCVModal = () => {
     setIsCVModalOpen(false);
@@ -58,32 +70,39 @@ export default function Home() {
     return pos.category === activeFilter;
   });
 
+  const trustBarItems = [
+    { icon: <Award className="h-5 w-5 text-amber-500" />, label: "ECFMG-certified" },
+    { icon: <Stethoscope className="h-5 w-5 text-teal-500" />, label: "Physician" },
+    { icon: <Activity className="h-5 w-5 text-blue-500" />, label: "Clinical Researcher" },
+    { icon: <BookOpen className="h-6 w-6" />, label: "Publications", value: portfolioData.publications.length },
+    { icon: <Users className="h-6 w-6" />, label: "ICUs Coordinated", value: "20" },
+    {
+      icon: <OrcidIcon className="h-6 w-6" />,
+      label: "ORCID iD",
+      value: portfolioData.personalInfo.orcid,
+      href: `https://orcid.org/${portfolioData.personalInfo.orcid}`,
+    },
+  ];
+
   return (
     <div className="pt-24 pb-16 relative">
       <Suspense fallback={null}>
         <SearchParamsListener onOpenCV={() => setIsCVModalOpen(true)} />
       </Suspense>
 
-
-
       {/* HERO SECTION */}
-      <section ref={heroSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20">
+      <section ref={heroSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="space-y-6"
-          >
+          <div className="space-y-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/10 dark:bg-teal-500/10 backdrop-blur-md text-teal-750 dark:text-teal-300 text-sm font-medium border border-teal-500/20">
               <MapPin className="h-4 w-4" />
               {portfolioData.personalInfo.location}
             </div>
-            
+
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 drop-shadow-lg">
               <span className="block">{portfolioData.personalInfo.name}</span>
             </h1>
-            
+
             <div className="text-xl md:text-2xl text-slate-650 dark:text-slate-200 font-medium h-8 drop-shadow-md">
               Expertise in{" "}
               <AnimatePresence mode="wait">
@@ -92,7 +111,7 @@ export default function Home() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: duration.fast }}
                   className="text-teal-600 dark:text-teal-400 inline-block font-bold"
                 >
                   {domains[currentDomain]}
@@ -100,55 +119,50 @@ export default function Home() {
               </AnimatePresence>
             </div>
 
-            <div className="flex flex-wrap gap-3 pt-2">
-              <div className="flex items-center gap-2 px-4 py-2 backdrop-blur-md bg-white/30 dark:bg-slate-900/30 rounded-xl shadow-sm border border-white/20 dark:border-slate-800/40">
-                <Award className="h-5 w-5 text-amber-500" />
-                <span className="text-sm font-medium text-slate-800 dark:text-slate-200">ECFMG-certified</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 backdrop-blur-md bg-white/30 dark:bg-slate-900/30 rounded-xl shadow-sm border border-white/20 dark:border-slate-800/40">
-                <Stethoscope className="h-5 w-5 text-teal-500" />
-                <span className="text-sm font-medium text-slate-800 dark:text-slate-200">Physician</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 backdrop-blur-md bg-white/30 dark:bg-slate-900/30 rounded-xl shadow-sm border border-white/20 dark:border-slate-800/40">
-                <Activity className="h-5 w-5 text-blue-500" />
-                <span className="text-sm font-medium text-slate-800 dark:text-slate-200">Clinical Researcher</span>
-              </div>
-            </div>
-
             <div className="pt-8 flex flex-wrap gap-4">
-              <button 
+              <button
                 onClick={() => setIsCVModalOpen(true)}
                 className="px-8 py-3.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl font-medium shadow-md shadow-teal-600/10 hover:shadow-teal-500/20 hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer"
               >
                 Request Professional CV
               </button>
-              <a 
+              <a
                 href="/research"
                 className="px-8 py-3.5 backdrop-blur-md bg-white/10 dark:bg-slate-900/10 hover:bg-white/20 dark:hover:bg-slate-900/20 text-slate-900 dark:text-slate-50 border border-white/25 dark:border-slate-800/60 rounded-xl font-medium shadow-sm transition-all"
               >
                 Explore Research
               </a>
             </div>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
-          >
+          </div>
+
+          <div className="relative">
             <HeroVisual sectionRef={heroSectionRef} />
-          </motion.div>
+          </div>
         </div>
+      </section>
+
+      {/* CREDIBILITY / TRUST BAR */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+        >
+          <TrustBar items={trustBarItems} className="justify-center" />
+        </motion.div>
       </section>
 
       {/* EXECUTIVE OVERVIEW */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+          <motion.div
+            ref={overviewHeaderRef}
+            style={{ y: overviewParallax.y }}
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
             className="text-center max-w-3xl mx-auto mb-16"
           >
             <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-6 drop-shadow-lg">Executive Overview</h2>
@@ -157,11 +171,15 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+          <motion.div
+            variants={staggerContainer()}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          >
+            <motion.div
+              variants={staggerItem}
               className="glass-card rounded-2xl p-8 hover:shadow-xl hover:shadow-teal-500/5 transition-all duration-350"
             >
               <div className="w-12 h-12 bg-teal-100 dark:bg-teal-900/50 rounded-xl flex items-center justify-center mb-6">
@@ -184,10 +202,8 @@ export default function Home() {
               </ul>
             </motion.div>
 
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+            <motion.div
+              variants={staggerItem}
               className="glass-card rounded-2xl p-8 hover:shadow-xl hover:shadow-teal-500/5 transition-all duration-350"
             >
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center mb-6">
@@ -209,15 +225,26 @@ export default function Home() {
                 </li>
               </ul>
             </motion.div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
+      {/* FEATURED RESEARCH TEASER */}
+      <FeaturedResearch />
+
       {/* FILTERABLE TIMELINE */}
       <section className="py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <motion.div
+          ref={trajectoryHeaderRef}
+          style={{ y: trajectoryParallax.y }}
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          className="text-center mb-12"
+        >
           <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-4 drop-shadow-lg">Professional Trajectory</h2>
-          
+
           <div className="flex flex-wrap justify-center gap-2.5 mt-8">
             {(["All", "Clinical", "Research", "Leadership", "Education"] as const).map((filter) => (
                 <button
@@ -239,18 +266,18 @@ export default function Home() {
                 </button>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         <div ref={timelineRef} className="relative border-l-2 border-teal-500/25 dark:border-teal-500/15 ml-4 md:ml-8">
           <TimelineSpine containerRef={timelineRef} />
           <AnimatePresence>
             {filteredPositions.map((pos, index) => (
-              <motion.div 
+              <motion.div
                 key={`${pos.title}-${pos.organization}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
+                transition={{ duration: duration.fast, delay: index * 0.1, ease: easing.cinematicOut }}
                 className="mb-8 pl-8 relative"
               >
                 <div className={`absolute -left-[9px] top-1.5 w-4 h-4 rounded-full border-2 border-white dark:border-slate-900 ${
@@ -258,11 +285,16 @@ export default function Home() {
                   pos.category === "Research" ? "bg-blue-500" :
                   "bg-amber-500"
                 }`} />
-                
-                <article 
+
+                <article
                   className="glass-card rounded-2xl p-6 cursor-pointer hover:shadow-xl hover:shadow-teal-500/5 hover:-translate-y-0.5 transition-all duration-300 border border-slate-200 dark:border-slate-800"
                   onClick={() => setExpandedNode(expandedNode === index ? null : index)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') setExpandedNode(expandedNode === index ? null : index) }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setExpandedNode(expandedNode === index ? null : index);
+                    }
+                  }}
                   tabIndex={0}
                   role="button"
                   aria-expanded={expandedNode === index}
@@ -310,26 +342,37 @@ export default function Home() {
       {/* CLINICAL TOOLKIT MATRIX */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <motion.div
+            ref={toolkitHeaderRef}
+            style={{ y: toolkitParallax.y }}
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            className="text-center mb-16"
+          >
             <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 drop-shadow-lg">Clinical Toolkit Matrix</h2>
             <p className="text-slate-600 dark:text-slate-200 mt-4 font-medium drop-shadow-md">Core competencies and procedural skills</p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.div
+            variants={staggerContainer()}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          >
             {portfolioData.skills.map((skillGroup, idx) => (
               <motion.div
                 key={skillGroup.category}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
+                variants={staggerItem}
                 className="glass-card rounded-2xl p-8 hover:shadow-xl hover:shadow-teal-500/5 transition-all duration-300"
               >
                 <div className="flex items-center gap-3 mb-6">
                   {idx === 0 ? <Activity className="w-6 h-6 text-teal-500" /> : <Stethoscope className="w-6 h-6 text-teal-500" />}
                   <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">{skillGroup.category}</h3>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {skillGroup.items.map((item, i) => {
                     const [title, desc] = item.split(":");
@@ -343,26 +386,37 @@ export default function Home() {
                 </div>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* HUMANITARIAN FOOTPRINT */}
       <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <motion.div
+          ref={humanitarianHeaderRef}
+          style={{ y: humanitarianParallax.y }}
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          className="text-center mb-16"
+        >
           <Heart className="w-12 h-12 text-rose-500 mx-auto mb-4" />
           <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 drop-shadow-lg">Humanitarian Footprint</h2>
           <p className="text-slate-600 dark:text-slate-200 mt-4 font-medium drop-shadow-md">Dedicated to community health and equitable medical access</p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <motion.div
+          variants={staggerContainer()}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+        >
           {portfolioData.volunteering.map((vol, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
+              variants={staggerItem}
               className="glass-card rounded-2xl p-6 flex flex-col h-full hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-300 hover:-translate-y-0.5"
             >
               <div className="text-xs font-bold text-rose-500 dark:text-rose-400 mb-2">{vol.date}</div>
@@ -380,8 +434,11 @@ export default function Home() {
               </ul>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
+
+      {/* CLOSING CTA */}
+      <ClosingCTA onOpenCVModal={() => setIsCVModalOpen(true)} />
 
       <CVRequestModal isOpen={isCVModalOpen} onClose={handleCloseCVModal} />
     </div>
