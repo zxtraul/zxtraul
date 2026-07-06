@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import Image from "next/image";
 
 /**
  * The original CSS-transform tilt card (perspective + rotateX/rotateY).
@@ -38,10 +39,13 @@ export function HeroPhotoCardCSS() {
           className="w-full h-full bg-slate-200 dark:bg-slate-700 rounded-2xl overflow-hidden relative"
           style={{ transform: "translateZ(40px)" }}
         >
-          <img
+          <Image
             src="/profile-whitecoat.jpg"
             alt="Dr. Rahul Parajuli"
-            className="absolute inset-0 w-full h-full object-cover object-top hover:scale-[1.05] transition-transform duration-700 ease-out"
+            fill
+            priority
+            sizes="(max-width: 768px) 90vw, 448px"
+            className="object-cover object-top hover:scale-[1.05] transition-transform duration-700 ease-out"
             style={{ filter: "brightness(1.15) contrast(1.05)" }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent" />
