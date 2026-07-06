@@ -3,14 +3,16 @@
 import { motion } from "framer-motion";
 import { ExternalLink, Activity } from "lucide-react";
 import { portfolioData } from "@/data/portfolioData";
+import { fadeUp } from "@/lib/motion";
 
 export default function BlogPage() {
   return (
     <div className="pt-24 pb-20 min-h-screen bg-transparent">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
           className="backdrop-blur-xl bg-white/20 dark:bg-slate-950/35 rounded-2xl border border-white/20 dark:border-white/10 shadow-lg p-8 sm:p-10 text-center"
         >
           <div className="inline-flex items-center justify-center p-3 bg-teal-100 dark:bg-teal-900/50 rounded-full mb-6">

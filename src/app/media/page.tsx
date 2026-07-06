@@ -6,6 +6,7 @@ import { X, Image as ImageIcon } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
 import { GalleryTileTilt } from "@/components/three/GalleryTileTilt";
+import { staggerContainer, staggerItem, viewportOnce } from "@/lib/motion";
 
 // Mock media items with actual generated image paths
 const mediaItems = [
@@ -71,14 +72,17 @@ export default function MediaPage() {
         </div>
 
         {/* CSS-based Masonry Grid */}
-        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-          {mediaItems.map((item, idx) => (
+        <motion.div
+          variants={staggerContainer()}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6"
+        >
+          {mediaItems.map((item) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
+              variants={staggerItem}
               className="break-inside-avoid"
             >
               <GalleryTileTilt
@@ -108,7 +112,7 @@ export default function MediaPage() {
               </GalleryTileTilt>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
  
       {/* LIGHTBOX MODAL */}

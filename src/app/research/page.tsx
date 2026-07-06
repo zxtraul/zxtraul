@@ -1,18 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { portfolioData } from "@/data/portfolioData";
-import { Search, ExternalLink, Copy, Check, BookOpen, Activity, Library, Award } from "lucide-react";
+import { Search, ExternalLink, Copy, Check, Activity, Library } from "lucide-react";
 import clsx from "clsx";
 import { HelixAccent } from "@/components/three/HelixAccent";
+import { TrustBar, OrcidIcon } from "@/components/TrustBar";
+import { useSectionParallax } from "@/hooks/useSectionParallax";
+import { fadeUp, scaleIn, staggerContainer, viewportOnce, duration, easing } from "@/lib/motion";
 
 export default function ResearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"All" | "Peer-Reviewed" | "Preprint" | "Case Report" | "Under Review">("All");
+  const headerRef = useRef<HTMLDivElement>(null);
+  const headerParallax = useSectionParallax(headerRef);
 
   const filteredPublications = portfolioData.publications.filter((pub) => {
-    const matchesSearch = pub.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = pub.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           pub.journal.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTab = activeTab === "All" || pub.type === activeTab;
     return matchesSearch && matchesTab;
@@ -20,8 +25,17 @@ export default function ResearchPage() {
 
   const totalPubs = portfolioData.publications.length;
   const peerReviewedCount = portfolioData.publications.filter(p => p.type === "Peer-Reviewed").length;
-  const preprintsCount = portfolioData.publications.filter(p => p.type === "Preprint").length;
-  const caseReportsCount = portfolioData.publications.filter(p => p.type === "Case Report").length;
+
+  const trustBarItems = [
+    {
+      icon: <OrcidIcon className="h-6 w-6" />,
+      label: "ORCID iD",
+      value: portfolioData.personalInfo.orcid,
+      href: `https://orcid.org/${portfolioData.personalInfo.orcid}`,
+    },
+    { icon: <Library className="h-6 w-6" />, label: "Total Publications", value: totalPubs },
+    { icon: <Activity className="h-6 w-6" />, label: "Peer-Reviewed", value: peerReviewedCount },
+  ];
 
   return (
     <div className="pt-24 pb-20">
@@ -29,8 +43,11 @@ export default function ResearchPage() {
       <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
         <HelixAccent />
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          ref={headerRef}
+          style={{ y: headerParallax.y }}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
           className="max-w-4xl mx-auto text-center"
         >
           <div className="inline-flex items-center justify-center p-3 bg-teal-100 dark:bg-teal-900/50 rounded-full mb-6">
@@ -43,26 +60,7 @@ export default function ResearchPage() {
             Dedicated to advancing evidence-based medicine through rigorous methodology, multicentric study coordination, and ICU registries. My research spans critical care outcomes, antimicrobial stewardship, and the integration of artificial intelligence in healthcare, maintaining strict adherence to GCP guidelines.
           </p>
 
-          {/* ACADEMIC METRICS RIBBON */}
-          <div className="flex flex-wrap justify-center gap-4">
-            <a 
-              href={`https://orcid.org/${portfolioData.personalInfo.orcid}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-5 py-3 backdrop-blur-xl bg-white/10 dark:bg-slate-900/10 rounded-xl border border-white/20 dark:border-white/10 hover:shadow-md hover:shadow-teal-500/5 transition-all group"
-            >
-              <svg viewBox="0 0 24 24" className="h-6 w-6 fill-teal-600 dark:fill-teal-400 group-hover:scale-110 transition-transform">
-                <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zM7.369 4.378c.525 0 .947.431.947.947s-.422.947-.947.947a.95.95 0 0 1-.947-.947c0-.525.422-.947.947-.947zm-.722 3.038h1.444v10.041H6.647V7.416zm3.562 0h3.9c3.712 0 5.344 2.653 5.344 5.025 0 2.578-2.016 5.025-5.325 5.025h-3.919V7.416zm1.444 1.303v7.444h2.297c3.272 0 4.022-2.484 4.022-3.722 0-2.016-1.284-3.722-4.097-3.722h-2.222z"/>
-              </svg>
-              <div className="text-left">
-                <div className="text-xs text-slate-500 font-medium">ORCID iD</div>
-                <div className="text-sm font-bold text-slate-900 dark:text-slate-50">{portfolioData.personalInfo.orcid}</div>
-              </div>
-            </a>
-            
-            <MetricBadge icon={<BookOpen />} label="Total Publications" count={totalPubs} />
-            <MetricBadge icon={<Award />} label="Peer-Reviewed" count={peerReviewedCount} />
-          </div>
+          <TrustBar items={trustBarItems} className="justify-center" />
         </motion.div>
       </section>
 
@@ -72,21 +70,24 @@ export default function ResearchPage() {
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">Lines of Inquiry</h2>
           </div>
-          <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
+          <motion.div
+            variants={staggerContainer(0.05)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto"
+          >
             {portfolioData.interests.map((interest, idx) => (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.05 }}
+                variants={scaleIn}
                 className="backdrop-blur-md bg-white/15 dark:bg-slate-950/30 px-5 py-3 rounded-full shadow-sm border border-white/10 dark:border-white/5 text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2 hover:border-teal-500 dark:hover:border-teal-400 transition-all"
               >
                 <Activity className="h-4 w-4 text-teal-500" />
                 {interest}
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -152,20 +153,6 @@ export default function ResearchPage() {
   );
 }
 
-function MetricBadge({ icon, label, count }: { icon: React.ReactNode, label: string, count: number }) {
-  return (
-    <div className="flex items-center gap-3 px-5 py-3 backdrop-blur-xl bg-white/10 dark:bg-slate-900/10 rounded-xl border border-white/20 dark:border-white/10 shadow-md">
-      <div className="text-teal-600 dark:text-teal-400">
-        {icon}
-      </div>
-      <div className="text-left">
-        <div className="text-xs text-slate-500 font-medium">{label}</div>
-        <div className="text-sm font-bold text-slate-900 dark:text-slate-50">{count}</div>
-      </div>
-    </div>
-  );
-}
-
 function PublicationCard({ publication, index }: { publication: typeof portfolioData.publications[0], index: number }) {
   const [copied, setCopied] = useState(false);
 
@@ -198,7 +185,7 @@ function PublicationCard({ publication, index }: { publication: typeof portfolio
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
+      transition={{ duration: duration.fast, delay: index * 0.05, ease: easing.cinematicOut }}
       className="backdrop-blur-xl bg-white/20 dark:bg-slate-950/35 p-6 md:p-8 rounded-2xl border border-white/20 dark:border-white/10 hover:shadow-xl hover:shadow-teal-500/5 transition-all relative overflow-hidden group"
     >
       {/* Type Indicator */}
