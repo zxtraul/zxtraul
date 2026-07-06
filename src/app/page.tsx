@@ -36,6 +36,7 @@ export default function Home() {
   const domains = ["Critical Care", "Cardiovascular/Pulmonary", "AI in Health", "Clinical Research"];
   const [currentDomain, setCurrentDomain] = useState(0);
   const timelineRef = useRef<HTMLDivElement>(null);
+  const heroSectionRef = useRef<HTMLElement>(null);
 
   const handleCloseCVModal = () => {
     setIsCVModalOpen(false);
@@ -66,7 +67,7 @@ export default function Home() {
 
 
       {/* HERO SECTION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20">
+      <section ref={heroSectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -136,7 +137,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <HeroVisual />
+            <HeroVisual sectionRef={heroSectionRef} />
           </motion.div>
         </div>
       </section>

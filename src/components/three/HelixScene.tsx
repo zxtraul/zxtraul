@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, type MutableRefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { CanvasRoot } from "./CanvasRoot";
@@ -30,13 +30,19 @@ function useHelixStrands() {
   }, []);
 }
 
-function DoubleHelix() {
+interface DoubleHelixProps {
+  scrollVelocityRef?: MutableRefObject<number>;
+}
+
+function DoubleHelix({ scrollVelocityRef }: DoubleHelixProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { strandA, strandB } = useHelixStrands();
 
   useFrame((_, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.25;
+      const rawVelocity = scrollVelocityRef?.current ?? 0;
+      const scrollBoost = Math.min(Math.abs(rawVelocity) * 0.5, 3);
+      groupRef.current.rotation.y += delta * (0.25 + scrollBoost * 0.15);
     }
   });
 
@@ -77,15 +83,16 @@ function DoubleHelix() {
 
 interface HelixSceneProps {
   tier: Extract<WebGLTier, "low" | "high">;
+  scrollVelocityRef?: MutableRefObject<number>;
 }
 
 /** Decorative rotating DNA double-helix accent for the Research page. */
-export default function HelixScene({ tier }: HelixSceneProps) {
+export default function HelixScene({ tier, scrollVelocityRef }: HelixSceneProps) {
   return (
     <CanvasRoot tier={tier} camera={{ position: [0, 0, 5], fov: 45 }}>
       <ambientLight intensity={0.7} />
       <directionalLight position={[2, 2, 3]} intensity={0.6} />
-      <DoubleHelix />
+      <DoubleHelix scrollVelocityRef={scrollVelocityRef} />
     </CanvasRoot>
   );
 }

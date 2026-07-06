@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type MutableRefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { CanvasRoot } from "./CanvasRoot";
@@ -37,8 +37,16 @@ function createParticleField(count: number) {
 
 const PARTICLE_FIELD = createParticleField(PARTICLE_COUNT);
 
-function ParticleField() {
+const BASE_OPACITY = 0.55;
+const BASE_ROTATION_SPEED = 0.015;
+
+interface ParticleFieldProps {
+  scrollVelocityRef?: MutableRefObject<number>;
+}
+
+function ParticleField({ scrollVelocityRef }: ParticleFieldProps) {
   const pointsRef = useRef<THREE.Points>(null);
+  const materialRef = useRef<THREE.PointsMaterial>(null);
   const { positions, colors } = PARTICLE_FIELD;
   const pointerRef = useRef({ x: 0, y: 0 });
 
@@ -50,12 +58,26 @@ function ParticleField() {
     const points = pointsRef.current;
     if (!points) return;
 
-    points.rotation.y += delta * 0.015;
+    // Scroll velocity is in 0-1-progress-units/second — clamp to a sane
+    // boost range so a fast flick-scroll doesn't spin the field wildly.
+    const rawVelocity = scrollVelocityRef?.current ?? 0;
+    const scrollBoost = Math.min(Math.abs(rawVelocity) * 0.4, 4);
+
+    points.rotation.y += delta * (BASE_ROTATION_SPEED + scrollBoost * 0.02);
 
     const targetX = pointerRef.current.x * 0.6;
     const targetY = pointerRef.current.y * 0.4;
     points.position.x = THREE.MathUtils.lerp(points.position.x, targetX, 0.02);
     points.position.y = THREE.MathUtils.lerp(points.position.y, targetY, 0.02);
+
+    if (materialRef.current) {
+      const targetOpacity = Math.min(BASE_OPACITY + scrollBoost * 0.08, 0.9);
+      materialRef.current.opacity = THREE.MathUtils.lerp(
+        materialRef.current.opacity,
+        targetOpacity,
+        0.1
+      );
+    }
   });
 
   return (
@@ -65,10 +87,11 @@ function ParticleField() {
         <bufferAttribute attach="attributes-color" args={[colors, 3]} />
       </bufferGeometry>
       <pointsMaterial
+        ref={materialRef}
         size={0.045}
         vertexColors
         transparent
-        opacity={0.55}
+        opacity={BASE_OPACITY}
         sizeAttenuation
         depthWrite={false}
         blending={THREE.AdditiveBlending}
@@ -77,20 +100,26 @@ function ParticleField() {
   );
 }
 
+interface BackgroundSceneProps {
+  scrollVelocityRef?: MutableRefObject<number>;
+}
+
 /**
  * Ambient depth layer sitting under the existing scanline/grid/spotlight
  * CSS overlays in InteractiveBackground.tsx — additive, not a replacement.
  * 'high' tier only for now (always-on frameloop on every route is the
- * highest perf-risk item in the 3D plan).
+ * highest perf-risk item in the 3D plan). Reacts to scroll velocity (via
+ * a ref, never React state) in addition to pointer position, so the page
+ * feels alive as the reviewer scrolls, not just when they move the mouse.
  */
-export default function BackgroundScene() {
+export default function BackgroundScene({ scrollVelocityRef }: BackgroundSceneProps) {
   return (
     <CanvasRoot
       tier="high"
       camera={{ position: [0, 0, 5], fov: 55 }}
       frameloop="always"
     >
-      <ParticleField />
+      <ParticleField scrollVelocityRef={scrollVelocityRef} />
     </CanvasRoot>
   );
 }

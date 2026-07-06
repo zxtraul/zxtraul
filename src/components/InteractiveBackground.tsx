@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate, useVelocity } from "framer-motion";
@@ -22,6 +22,12 @@ export default function InteractiveBackground() {
   const smoothProgress = useSpring(scrollYProgress, { damping: 20, stiffness: 100, mass: 0.5 });
   const yOffset = useTransform(smoothProgress, [0, 1], ["0vh", "-150vh"]);
   const scale = useTransform(smoothProgress, [0, 1], [1.02, 1.05]);
+
+  // Scroll velocity threaded into the WebGL background layer so ambient
+  // particles react to scroll speed, not just cursor position — read via
+  // a ref inside BackgroundScene's useFrame, never via setState.
+  const scrollVelocity = useVelocity(scrollYProgress);
+  const scrollVelocityRef = useRef(0);
 
   // Mouse tracking
   const mouseX = useMotionValue(0);
@@ -80,7 +86,7 @@ export default function InteractiveBackground() {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
     };
-    
+
     if (typeof window !== "undefined") {
       mouseX.set(window.innerWidth / 2);
       mouseY.set(window.innerHeight / 2);
@@ -90,6 +96,12 @@ export default function InteractiveBackground() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [mouseX, mouseY]);
 
+  useEffect(() => {
+    return scrollVelocity.on("change", (v) => {
+      scrollVelocityRef.current = v;
+    });
+  }, [scrollVelocity]);
+
   if (!isMounted) return null;
 
   return (
@@ -97,7 +109,7 @@ export default function InteractiveBackground() {
       {/* WebGL ambient particle depth layer — 'high' tier only, additive under the CSS overlays below */}
       {webglTier === "high" && (
         <div className="absolute inset-0">
-          <BackgroundScene />
+          <BackgroundScene scrollVelocityRef={scrollVelocityRef} />
         </div>
       )}
 

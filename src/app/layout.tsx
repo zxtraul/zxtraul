@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { MotionConfig } from "framer-motion";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIAssistant from "@/components/AIAssistant";
 import InteractiveBackground from "@/components/InteractiveBackground";
+import { PageTransition } from "@/components/PageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,11 +59,15 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 min-h-screen flex flex-col`}
       >
-        <InteractiveBackground />
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-        <AIAssistant />
+        <MotionConfig reducedMotion="user">
+          <InteractiveBackground />
+          <Navbar />
+          <main className="flex-grow">
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <Footer />
+          <AIAssistant />
+        </MotionConfig>
       </body>
     </html>
   );
