@@ -1,7 +1,7 @@
-- 👋 Hi, I’m @zxtraul
-- 👀 I’m interested in Defi & dApps. 
-- 🌱 I’m currently learning truffle.
-- 💞️ I’m looking to collaborate on nothing.
+- 👋 Hi, I’m @zxtraul (Dr. Rahul Parajuli)
+- 👀 I’m interested in integrating AI and tech with medicine. 
+- 🌱 I’m currently learning to vibe code. 
+- 💞️ I’m looking to collaborate on stuffs of my interest as mentioned above)
 - 📫 How to reach me ... @zxtraul
 
 <!---
